@@ -21,7 +21,7 @@ def get_predict(name, budget, id):
         if name in val_cat:
             category = key_cat
         
-    full_df = {name: json_data[str(id)]}
+    full_df = {name: date_end}
 
     name_model = f'model_fit_{category}.pkl'
     with open(name_model, 'rb') as pkl:
