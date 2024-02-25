@@ -22,7 +22,7 @@ def get_predict(name, budget, date_end):
         
     full_df = {name: json_data[name]}
 
-    name_model = f'model_{category}.pkl'
+    name_model = f'model_fit_{category}.pkl'
     with open(name_model, 'rb') as pkl:
         model = pickle.load(pkl)
 
