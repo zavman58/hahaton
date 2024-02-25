@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 import pickle
+import datetime
 
 categories = {'food': ['AGAMA', 'Delivery Club', 'Elementaree', 'GLOBUS', 'Greenbox Рационы', 'Grow Food', 'Growfood', 'JustFood', 'My Food', 'SPAR', 'Vprok.ru Перекрёсток', 'Wow Food', 'YAMDIET', 'Yamdiet', 'pobo', 'Ашан', 'Бахетле', 'Веселый Водовоз', 'ВкусВилл', 'ВкусВилл Готовит', 'ВкусВилл в Тинькофф', 'ВкусМил', 'ВкусМил от ВкусВилл', 'ВкусМилл от ВкусВилл', 'ВкусНаДом', 'Вкусвилл', 'Все в разделе «ВкусВилл»', 'Гипермаркет Карусель', 'Дикси', 'Доставка питания YAMDIET', 'Доставка питания Yamdiet', 'ЛЕНТА', 'ЛЕНТА Онлайн', 'Лавка Edoque', 'Лента', 'Лента Онлайн', 'Магнит', 'Магнолия', 'Мегамаркет', 'Михайлик Kitchen', 'О’КЕЙ', 'Пан Запекан', 'Перекрёсток', 'Петрович', 'Порядок', 'Порядок.ру', 'Правильная корзинка', 'ПриЕм!', 'Программы питания Level Kitchen', 'Пятёрочка', 'Сhef At Home', 'Самокат', 'Сахар', 'Сеть магазинов «Пятёрочка»', 'Слата', 'Ужин Дома', 'Шефмаркет', 'Яндекс Еда', 'Яндекс Лавка', 'Яндекс.Еда', 'Яндекс.Еда и Лавка', 'Яндекс.Лавка', 'Ярче', 'Ярче!', 'интернет-магазин GLOBUS', 'интернет-магазин ВкусВилл'],
               'education': ['Advance', 'GoPractice Growth', 'LingvaBOOM', 'MyFitlab', 'Puzzle English', 'SKYENG', 'School of Practical Investment', 'Skyeng', 'Skyeng Math', 'Skyeng Премиум', 'Skypro', 'Skysmart', 'Skysmart Premium', 'Smart Reading', 'SmartReading', 'Smartreading', 'Storytel', 'X10 Academy', 'Аудиомания', 'Аудиомания.ру', 'Для студентов ВШЭ', 'Для студентов МГТУ им. Баумана', 'Для студентов МГУ', 'Для студентов НИУ ВШЭ СПб', 'Интернет-магазин «Читай-город»', 'Интернет-магазин Читай-город', 'Испаника', 'Нетология', 'Онлайн школа  LingvaBOOM', 'Онлайн школа Испаника', 'Парусная Академия', 'Республика', 'Сотка', 'Тетрика', 'Умскул', 'Учи.ру', 'Фоксфорд', 'Читай город', 'Читай-город', 'Школа идеального тела'],
@@ -25,7 +26,7 @@ def get_predict(name, budget, date_end):
     with open(name_model, 'rb') as pkl:
         model = pickle.load(pkl)
 
-    periods = (date_end - pd.to_datetime('2023-01-01')).dt.days
+    periods = (date_end - pd.to_datetime('2023-01-01')).day
     predict = model.predict(n_periods=periods)
 
     dates = pd.date_range(pd.to_datetime('2023-01-01'), date_end)
@@ -36,8 +37,16 @@ def get_predict(name, budget, date_end):
     for i in range(df_pred.shape[0]):
         sum_cash += df_pred.iloc[i, -1] 
         if sum_cash >= budget:
-            full_df[name] = pd.to_datetime(df_pred.iloc[i, 0])
+            plan_time = pd.to_datetime(full_df[name])
+            now_time = pd.to_datetime(df_pred.iloc[i, 0])
+            if plan_time > now_time:
+                full_df[name] = pd.to_datetime(f'{now_time.year}-{now_time.month}-{now_time.day}')
+            else:
+                full_df[name] = plan_time
     
     json_data[name] = full_df[name]
     with open('predictions.json', 'w') as f:    
         json.dump(json_data, f)
+
+
+
