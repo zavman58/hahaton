@@ -27,7 +27,7 @@ def get_predict(name, budget, id):
     with open(name_model, 'rb') as pkl:
         model = pickle.load(pkl)
 
-    periods = (date_end - pd.to_datetime('2023-01-01')).dt.days
+    periods = (date_end - pd.to_datetime('2023-01-01')).days
     predict = model.predict(n_periods=periods)
 
     dates = pd.date_range(pd.to_datetime('2023-01-01'), date_end)
