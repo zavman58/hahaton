@@ -2,6 +2,7 @@ import pandas as pd
 import json
 import pickle
 import datetime
+import pmdarima
 
 categories = {'food': ['AGAMA', 'Delivery Club', 'Elementaree', 'GLOBUS', 'Greenbox Рационы', 'Grow Food', 'Growfood', 'JustFood', 'My Food', 'SPAR', 'Vprok.ru Перекрёсток', 'Wow Food', 'YAMDIET', 'Yamdiet', 'pobo', 'Ашан', 'Бахетле', 'Веселый Водовоз', 'ВкусВилл', 'ВкусВилл Готовит', 'ВкусВилл в Тинькофф', 'ВкусМил', 'ВкусМил от ВкусВилл', 'ВкусМилл от ВкусВилл', 'ВкусНаДом', 'Вкусвилл', 'Все в разделе «ВкусВилл»', 'Гипермаркет Карусель', 'Дикси', 'Доставка питания YAMDIET', 'Доставка питания Yamdiet', 'ЛЕНТА', 'ЛЕНТА Онлайн', 'Лавка Edoque', 'Лента', 'Лента Онлайн', 'Магнит', 'Магнолия', 'Мегамаркет', 'Михайлик Kitchen', 'О’КЕЙ', 'Пан Запекан', 'Перекрёсток', 'Петрович', 'Порядок', 'Порядок.ру', 'Правильная корзинка', 'ПриЕм!', 'Программы питания Level Kitchen', 'Пятёрочка', 'Сhef At Home', 'Самокат', 'Сахар', 'Сеть магазинов «Пятёрочка»', 'Слата', 'Ужин Дома', 'Шефмаркет', 'Яндекс Еда', 'Яндекс Лавка', 'Яндекс.Еда', 'Яндекс.Еда и Лавка', 'Яндекс.Лавка', 'Ярче', 'Ярче!', 'интернет-магазин GLOBUS', 'интернет-магазин ВкусВилл'],
               'education': ['Advance', 'GoPractice Growth', 'LingvaBOOM', 'MyFitlab', 'Puzzle English', 'SKYENG', 'School of Practical Investment', 'Skyeng', 'Skyeng Math', 'Skyeng Премиум', 'Skypro', 'Skysmart', 'Skysmart Premium', 'Smart Reading', 'SmartReading', 'Smartreading', 'Storytel', 'X10 Academy', 'Аудиомания', 'Аудиомания.ру', 'Для студентов ВШЭ', 'Для студентов МГТУ им. Баумана', 'Для студентов МГУ', 'Для студентов НИУ ВШЭ СПб', 'Интернет-магазин «Читай-город»', 'Интернет-магазин Читай-город', 'Испаника', 'Нетология', 'Онлайн школа  LingvaBOOM', 'Онлайн школа Испаника', 'Парусная Академия', 'Республика', 'Сотка', 'Тетрика', 'Умскул', 'Учи.ру', 'Фоксфорд', 'Читай город', 'Читай-город', 'Школа идеального тела'],
@@ -32,7 +33,7 @@ def get_predict(name, budget, id):
         model = pickle.load(pkl)
       
     periods = (date_end - pd.to_datetime('2023-01-01')).days
-    predict = pd.to_frame(model.predict(n_periods=periods))[0]
+    predict = model.predict(n_periods=periods)).to_frame[0]
     dates = pd.date_range(pd.to_datetime('2023-01-01'), date_end)
 
     df_pred = pd.concat([dates, predict], axis=1)
