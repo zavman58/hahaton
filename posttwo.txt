@@ -1,0 +1,3 @@
+POST /api/partners
+
+{"name": "MaksimTaksi", "budget": 10}
