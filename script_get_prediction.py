@@ -43,7 +43,7 @@ def get_predict(name, budget, id):
             if plan_time > now_time:
                 full_df[name] = f'{now_time.year}-{now_time.month}-{now_time.day}'
             else:
-                full_df[name] = plan_time
+                full_df[name] = f'{plan_time.year}-{plan_time.month}-{plan_time.day}'
     
     json_data[str(id)] = full_df[name]
     with open('predictions.json', 'w') as f:    
