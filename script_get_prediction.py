@@ -17,13 +17,17 @@ def get_predict(name, budget, id):
     with open('predictions.json', 'r') as json_file:
         json_data = json.load(json_file)
 
+    category = None
+  
     for key_cat, val_cat in categories.items():
         if name in val_cat:
             category = key_cat
+          
+    assert category is not None, "Не нашлась категория..."
         
     full_df = {name: date_end}
 
-    name_model = f'model_fit_{category}.pkl'
+    name_model = f'fit-model/model_fit_{category}.pkl'
     with open(name_model, 'rb') as pkl:
         model = pickle.load(pkl)
 
