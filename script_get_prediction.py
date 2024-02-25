@@ -18,37 +18,39 @@ def get_predict(name, budget, id):
     with open('predictions.json', 'r') as json_file:
         json_data = json.load(json_file)
 
-    category = None
-  
     for key_cat, val_cat in categories.items():
         if name in val_cat:
             category = key_cat
-          
-    assert category is not None, "Не нашлась категория..."
         
     full_df = {name: date_end}
 
-    name_model = f'fit-model/model_fit_{category}.pkl'
+    name_model = f'model_fit_{category}.pkl'
     with open(name_model, 'rb') as pkl:
         model = pickle.load(pkl)
-      
-    periods = (date_end - pd.to_datetime('2023-01-01')).days
-    predict = model.predict(n_periods=periods)).to_frame[0]
-    dates = pd.date_range(pd.to_datetime('2023-01-01'), date_end)
 
+    periods = (date_end - pd.to_datetime('2023-01-01')).days
+    predict = model.predict(n_periods=periods).to_frame().reset_index()
+    predict = predict.drop(columns='index')
+    predict = predict.rename({0: 'cash'}, axis=1)
+    
+    dates = pd.date_range(pd.to_datetime('2023-01-01').date(), date_end.date()).to_frame().reset_index()
+    dates = dates.drop(columns=[0])
+    
     df_pred = pd.concat([dates, predict], axis=1)
+    df_pred = df_pred.dropna()
     
     sum_cash = 0
     for i in range(df_pred.shape[0]):
         sum_cash += df_pred.iloc[i, -1] 
-        if sum_cash >= budget:
+        if sum_cash >= int(budget):
             plan_time = pd.to_datetime(full_df[name])
             now_time = pd.to_datetime(df_pred.iloc[i, 0])
             if plan_time > now_time:
                 full_df[name] = f'{now_time.year}-{now_time.month}-{now_time.day}'
             else:
-                full_df[name] = f'{plan_time.year}-{plan_time.month}-{plan_time.day}'
+                full_df[name] = plan_time
+
+    json_data[str(id)] = str(full_df[name].date())
     
-    json_data[str(id)] = full_df[name]
     with open('predictions.json', 'w') as f:    
         json.dump(json_data, f)
