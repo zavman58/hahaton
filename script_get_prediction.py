@@ -11,8 +11,9 @@ categories = {'food': ['AGAMA', 'Delivery Club', 'Elementaree', 'GLOBUS', 'Green
               'restaurant': ['BB&BURGERS', 'BURGER KING', 'Burger King', 'Cofix', "Domino's Pizza", 'Four', 'Gent', 'KFC', 'Maestrello', 'PIZZASUSHIWOK.RU', 'PhoBo', 'Pizza Maestrello', 'PizzaSushiWok', 'PrimeMeat', 'PrimeMeat.ru', 'Tasty Coffee', 'Бирвайн', 'Бургер Кинг', 'ВьетКафе', 'Гурманика', 'ДОДО Пицца', 'Додо', 'Додо Пицца', 'Кухня на районе', 'НИЯМА', 'Рестораны', 'Сушкоф и Дель Песто', 'Сушкоф и пицца', 'Теремок', 'Теремок ', 'Теремок Спб'],
               'bigpurchase': ['AUTODOC.RU', 'Anytime Prime', 'Braun', 'DNS', 'Don Plafon', 'Fandeco', 'Garlyn', 'Greenbox', 'HOBOT', 'HOFF', 'Haier', 'Inoxtime', 'LAZURIT', 'Lapsi', 'Lavita', 'Leran', 'Level Kitchen', 'Lustron', 'Lustron.ru', 'MELEON', 'Maxwell', 'Pushe', 'SantPrice.ru', 'TESSER', 'TESSER.RU', 'Xcom-shop', 're:Store', 'restore:', 'Гардиан', 'Двери ГАРДИАН', 'Двери Гардиан', 'Дивайн Лайт', 'ЛЮ.ру', 'Леруа Мерлен', 'М.Видео', 'Маркет света', 'Сантехника-Рум', 'Ситилинк', 'Фиссмания', 'Холодильник.ру', 'Эльдорадо']}
 
-def get_predict(name, budget, date_end):
-
+def get_predict(name, budget, id):
+    date_end = pd.to_datetime('2023-02-28')
+    
     with open('predictions.json', 'r') as json_file:
         json_data = json.load(json_file)
 
@@ -20,13 +21,13 @@ def get_predict(name, budget, date_end):
         if name in val_cat:
             category = key_cat
         
-    full_df = {name: json_data[name]}
+    full_df = {name: json_data[str(id)]}
 
-    name_model = f'model_fit_{category}.pkl'
+    name_model = f'model_{category}.pkl'
     with open(name_model, 'rb') as pkl:
         model = pickle.load(pkl)
 
-    periods = (date_end - pd.to_datetime('2023-01-01')).day
+    periods = (date_end - pd.to_datetime('2023-01-01')).dt.days
     predict = model.predict(n_periods=periods)
 
     dates = pd.date_range(pd.to_datetime('2023-01-01'), date_end)
@@ -40,13 +41,10 @@ def get_predict(name, budget, date_end):
             plan_time = pd.to_datetime(full_df[name])
             now_time = pd.to_datetime(df_pred.iloc[i, 0])
             if plan_time > now_time:
-                full_df[name] = pd.to_datetime(f'{now_time.year}-{now_time.month}-{now_time.day}')
+                full_df[name] = f'{now_time.year}-{now_time.month}-{now_time.day}'
             else:
                 full_df[name] = plan_time
     
-    json_data[name] = full_df[name]
+    json_data[str(id)] = full_df[name]
     with open('predictions.json', 'w') as f:    
         json.dump(json_data, f)
-
-
-
