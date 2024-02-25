@@ -30,12 +30,11 @@ def get_predict(name, budget, id):
     name_model = f'fit-model/model_fit_{category}.pkl'
     with open(name_model, 'rb') as pkl:
         model = pickle.load(pkl)
-
+      
     periods = (date_end - pd.to_datetime('2023-01-01')).days
-    predict = model.predict(n_periods=periods)
-
+    predict = pd.to_frame(model.predict(n_periods=periods))[0]
     dates = pd.date_range(pd.to_datetime('2023-01-01'), date_end)
-    predict = predict.to_frame(name='pred_cash')
+
     df_pred = pd.concat([dates, predict], axis=1)
     
     sum_cash = 0
