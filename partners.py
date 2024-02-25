@@ -1,5 +1,5 @@
 from dbManager import DBManager
-from script_get_preditcion import get_predict
+from script_get_prediction import get_predict
 import json, datetime
 PATH='db.json'
 PREDICTIONSFILE='predictions.json'
